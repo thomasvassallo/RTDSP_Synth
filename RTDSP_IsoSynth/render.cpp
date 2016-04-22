@@ -253,22 +253,24 @@ void readButtons(BeagleRTContext *context){
    //set it to 1 to collect parallel data
     digitalWriteFrame(context, 0, latchPin, GPIO_HIGH);
     digitalWriteFrame(context, 1, latchPin, GPIO_LOW); 
+
+    digitalWriteFrame(context, 0, clockPin, GPIO_HIGH); 
   }
 
   else {
     int digitalFrames=context->digitalFrames;
-    int clocksPerRender=digitalFrames/4;
+    int clocksPerRender=digitalFrames/8;
 
     for(int i=0; i<clocksPerRender; i++){
-      digitalWriteFrame(context, i*4, clockPin, GPIO_HIGH);
-      digitalWriteFrame(context, (i*4)+1, clockPin, GPIO_LOW);
+      digitalWriteFrame(context, i*8, clockPin, GPIO_LOW);
+      digitalWriteFrame(context, (i*8)+2, clockPin, GPIO_HIGH);
     }
 
     if(stateIndex>1){
       for(int i=0; i<clocksPerRender;i++){
         int buttonReadIndex = ((stateIndex-2)*clocksPerRender)+i;
 
-        bool newRead = digitalReadFrame(context, (i*4)+2, dataPin);
+        bool newRead = digitalReadFrame(context, (i*8)+6, dataPin);
 
         if (states[buttonReadIndex] != newRead) {
         // count the number of times we read a different state
