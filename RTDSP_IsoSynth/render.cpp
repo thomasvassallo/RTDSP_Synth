@@ -249,8 +249,8 @@ readButtons(context);
 
 void readButtons(BeagleRTContext *context){
 
-  int indexClock = stateIndex + 1;
-  int indexRead = stateIndex + 2;
+  int indexClock = stateIndex - 1;
+  int indexRead = stateIndex - 3;
 
   if (stateIndex==0){
    //set it to 1 to collect parallel data
