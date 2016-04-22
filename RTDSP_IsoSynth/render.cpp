@@ -105,11 +105,11 @@ unsigned int buttonNoteMapping[3][KEYCOUNT] = {
 // each button in this array order returns this number
 int buttonMap[] = {
        3, 2, 1, 0,
-     8, 4, 5, 6, 7,
-    9,10,11,14,13,12,
-  15,17,18,19,  20,21,22,
-    27,26,25,24,23,16, 
-      28,29,30,31,32,
+     5, 6, 7, 8, 4,
+    12,13,14,15,9,10,
+  11,16,20,21, 22,23,17,
+    30,29,28,24,19,18, 
+      25,26,27,32,31,
         39,38,37,36,
 
         33, 34, 35 // extra buttons
@@ -272,7 +272,7 @@ void readButtons(BeagleRTContext *context){
         diffCount[buttonReadIndex]++;
       // if we have seen enough, switch the state
         if (diffCount[buttonReadIndex] >= CHANGEAFTERREADS) {
-          rt_printf("DIRECT %d \n", indexRead);
+          rt_printf("%d \n", buttonReadIndex);
           diffCount[buttonReadIndex]=0;
           states[buttonReadIndex] = newRead;
           changeDetected(buttonReadIndex, newRead, context->audioSampleRate);
@@ -291,17 +291,13 @@ void readButtons(BeagleRTContext *context){
 // switch button mode
  void changeMode() {
   usingMap = (usingMap + 1) % 3;
-  if (!MIDIOVERUSB) {
     rt_printf("Using Map %d \n", usingMap);
-  }
 }
 
 // increase the 'up by one' count
 void raiseByOne() {
   upBy = (upBy + 1) % 12;
-  if (!MIDIOVERUSB) { 
     rt_printf("Up By One: %d \n", upBy);
-  }
 }
 
 // when a button changes state
