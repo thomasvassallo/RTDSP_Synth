@@ -5,6 +5,9 @@
 
 Button::Button(int sampleRate) {
 
+    rt_printf("Button Class \n");
+
+
     filterCuttoff = 200;
 
     filterEnv.setAttackRate(.1 * sampleRate);  // .1 second

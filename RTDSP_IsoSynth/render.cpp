@@ -136,9 +136,6 @@ bool setup(BeagleRTContext *context, void *userData)
 
 int sampleRate = context->audioSampleRate;
 
-  pinModeFrame(context, 0, P9_12, INPUT);
-  pinModeFrame(context, 0, P9_14, OUTPUT);
-
   gPotInput=1;
   gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
   
@@ -162,6 +159,8 @@ int sampleRate = context->audioSampleRate;
           buttonIndexMap[i] = -1;
 
           buttons[i] = new Button(context->audioSampleRate);
+          rt_printf("Test \n");
+
         }
 
       // create reverse button lookup
@@ -200,7 +199,7 @@ readButtons(context);
 
 
     sound=0.0;
-    
+
     // filter1.setCutoff(filterCuttoff*lfoMod);
     // filter1.setCutoffMod(filterEnv->process());
     // sound = filter1.process(sound);
@@ -238,12 +237,13 @@ void readButtons(BeagleRTContext *context){
       int buttonReadIndex = indexRead;
       bool newRead = digitalReadFrame(context, 5, dataPin);
 
+          rt_printf("%s", (newRead? "X":"_"));
+
       if (states[buttonReadIndex] != newRead) {
       // count the number of times we read a different state
         diffCount[buttonReadIndex]++;
       // if we have seen enough, switch the state
         if (diffCount[buttonReadIndex] >= CHANGEAFTERREADS) {
-          rt_printf("%d \n", buttonReadIndex);
           diffCount[buttonReadIndex]=0;
           states[buttonReadIndex] = newRead;
           changeDetected(buttonReadIndex, newRead, context->audioSampleRate);
@@ -256,6 +256,7 @@ void readButtons(BeagleRTContext *context){
   stateIndex++;
   if (indexRead==SWITCHCOUNT) {
     stateIndex = 0;
+    rt_printf("\n");
   }
 }
 
