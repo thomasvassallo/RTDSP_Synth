@@ -11,8 +11,8 @@
 #define MIDIOVERUSB (true) // if this is true then we output midi commands over usb instead of debug over usb and midi over USART1
 
 // pin layout
-int latchPin = P8_09;
-int dataPin = P8_07;
+int latchPin = P8_07;
+int dataPin = P8_09;
 int clockPin = P8_11;
 
 bool states[SWITCHCOUNT]; // the current recognised state
