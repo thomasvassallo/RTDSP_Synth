@@ -1,11 +1,3 @@
-//
-//  Filter.cpp
-//  SpaceBass
-//
-//  Created by Martin on 08.04.14.
-//
-//
-
 #include "Filter.h"
 
 // By Paul Kellett

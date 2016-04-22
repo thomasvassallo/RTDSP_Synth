@@ -20,11 +20,7 @@
 #define MIDIOVERUSB (true) // if this is true then we output midi commands over usb instead of debug over usb and midi over USART1
 
 
-float sound = 0.0;
-double filterCuttoff = 200.0;
-
-double oscFreq = 110;
-
+double sound = 0.0;
 double a = 440; // a is 440 hz...
 
 double lfoPhase;
@@ -38,16 +34,9 @@ int gPotInput;
 int gAudioFramesPerAnalogFrame;
 float fc;
 
-Filter filter1;
-ADSR *env;
-ADSR *filterEnv;
-WaveTableOsc osc1;
-
-int lastButtonStatus = 0;
-
 // pin layout
-int latchPin = P8_09;
-int dataPin = P8_07;
+int latchPin = P8_07;
+int dataPin = P8_09;
 int clockPin = P8_11;
 
 bool states[SWITCHCOUNT]; // the current recognised state
@@ -57,6 +46,8 @@ int usingMap = 0; // button map index, 0 to 2
 int upBy = 0; // up by 0 to 11
 
 int stateIndex=0;
+
+Button *buttons[SWITCHCOUNT]; //Create SWITCHCOUNT no. of button class
 
 // Different button map layouts
 // button map
@@ -129,8 +120,6 @@ void readButtons(BeagleRTContext *context);
 void changeDetected(int switchIndex, bool newState, int sampleRate);
 void raiseByOne();
 void changeMode();
-void buttonPressed(int note, int sampleRate);
-void buttonReleased(int note);
 
 
 // setup() is called once before the audio rendering starts.
@@ -144,34 +133,15 @@ void buttonReleased(int note);
 
       bool setup(BeagleRTContext *context, void *userData)
       {
-        int sampleRate = context->audioSampleRate;
 
-  env = new ADSR();
-  filterEnv = new ADSR();
+        int sampleRate = context->audioSampleRate;
 
   pinModeFrame(context, 0, P9_12, INPUT);
   pinModeFrame(context, 0, P9_14, OUTPUT);
 
   gPotInput=1;
   gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
-
-  setSawtoothOsc(&osc1, 20, context->audioSampleRate);
-
-  filterEnv->setTargetRatioA(0.1);
-  filterEnv->setTargetRatioDR(0.1);
-
-  filterEnv->setAttackRate(.1 * context->audioSampleRate);  // .1 second
-  filterEnv->setDecayRate(.3 * context->audioSampleRate);
-  filterEnv->setReleaseRate(.5 * context->audioSampleRate);
-  filterEnv->setSustainLevel(.8);
-
-  env->setTargetRatioA(0.1);
-  env->setTargetRatioDR(0.1);
-
-  env->setAttackRate(.01 * context->audioSampleRate);  // .1 second
-  env->setDecayRate(.3 * context->audioSampleRate);
-  env->setReleaseRate(.5 * context->audioSampleRate);
-  env->setSustainLevel(.8);
+  
 
   lfoPhase = 0.0;
     inverseSampleRate = 1.0/context->audioSampleRate;
@@ -305,7 +275,7 @@ void readButtons(BeagleRTContext *context){
 // increase the 'up by one' count
 void raiseByOne() {
   upBy = (upBy + 1) % 12;
-  if (!MIDIOVERUSB) { 
+  if (!MIDIOVERUSB) {
     rt_printf("Up By One: %d \n", upBy);
   }
 }
@@ -350,26 +320,6 @@ void changeDetected(int switchIndex, bool newState, int sampleRate) {
       buttonReleased(note);
     }      
   }
-}
-
-void buttonPressed(int note, int sampleRate) {
-
-  // double oscillatorFrequency=(a / 32.0) * (double)((2 ^ (note - 9)) / 12.0);
-  double oscillatorFrequency=(a / 32.0) * pow(2.0,((note - 9.0) / 12.0));;
-
-
-  osc1.setFrequency(oscillatorFrequency/sampleRate);
-  env->gate(true);
-  filterEnv->gate(true);
-  rt_printf("Frequency %f Note %d :ON \n", oscillatorFrequency, note);
-  
-}
-
-void buttonReleased(int note) {
-
-  env->gate(false);
-  filterEnv->gate(false);
-  
 }
 
 float lfo(float phase, int waveform)
@@ -550,6 +500,8 @@ void defineSawtooth(int len, int numHarmonics, myFloat *ar, myFloat *ai) {
         ar[jdx] = temp;
     }
 }
+
+
 
 // cleanup() is called once at the end, after the audio has stopped.
 // Release any resources that were allocated in setup().
