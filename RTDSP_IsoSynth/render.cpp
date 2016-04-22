@@ -96,11 +96,11 @@ unsigned int buttonNoteMapping[3][KEYCOUNT] = {
 // each button in this array order returns this number
 int buttonMap[] = {
        3, 2, 1, 0,
-     8, 4, 5, 6, 7,
-    9,10,11,14,13,12,
-  15,17,18,19,20,21,22,
-    27,26,25,24,23,16, 
-      28,29,30,31,32,
+     5, 6, 7, 8, 4,
+    12,13,14,15,9,10,
+  11,16,20,21, 22,23,17,
+    30,29,28,24,19,18, 
+      25,26,27,32,31,
         39,38,37,36,
 
         33, 34, 35 // extra buttons
@@ -219,65 +219,55 @@ readButtons(context);
 
 void readButtons(BeagleRTContext *context){
 
+  int indexClock = stateIndex - 1;
+  int indexRead = stateIndex - 3;
+
   if (stateIndex==0){
    //set it to 1 to collect parallel data
     digitalWriteFrame(context, 0, latchPin, GPIO_HIGH);
-    digitalWriteFrame(context, 1, latchPin, GPIO_LOW); 
+    digitalWriteFrame(context, 2, latchPin, GPIO_LOW); 
   }
 
-  else {
-    int digitalFrames=context->digitalFrames;
-    int clocksPerRender=digitalFrames/4;
+  if ((indexClock>=0) && (indexClock<SWITCHCOUNT)) { 
+      digitalWriteFrame(context, 0, clockPin, GPIO_LOW);
+      digitalWriteFrame(context, 10, clockPin, GPIO_HIGH);
+  }
 
-    for(int i=0; i<clocksPerRender; i++){
-      digitalWriteFrame(context, i*4, clockPin, GPIO_HIGH);
-      digitalWriteFrame(context, (i*4)+1, clockPin, GPIO_LOW);
-    }
+  if((indexRead>=0) && (indexRead<SWITCHCOUNT)) {
+      int buttonReadIndex = indexRead;
+      bool newRead = digitalReadFrame(context, 5, dataPin);
 
-    if(stateIndex>1){
-      for(int i=0; i<clocksPerRender;i++){
-        int buttonReadIndex = ((stateIndex-2)*clocksPerRender)+i;
-
-        bool newRead = digitalReadFrame(context, (i*4)+2, dataPin);
-
-        if (states[buttonReadIndex] != newRead) {
-        // count the number of times we read a different state
-          diffCount[buttonReadIndex]++;
-        // if we have seen enough, switch the state
-          if (diffCount[buttonReadIndex] >= CHANGEAFTERREADS) {
-            diffCount[buttonReadIndex]=0;
-            states[buttonReadIndex] = newRead;
-            changeDetected(buttonReadIndex, newRead, context->audioSampleRate);
-          }
-        } else {
-          diffCount[buttonReadIndex] = 0;
+      if (states[buttonReadIndex] != newRead) {
+      // count the number of times we read a different state
+        diffCount[buttonReadIndex]++;
+      // if we have seen enough, switch the state
+        if (diffCount[buttonReadIndex] >= CHANGEAFTERREADS) {
+          rt_printf("%d \n", buttonReadIndex);
+          diffCount[buttonReadIndex]=0;
+          states[buttonReadIndex] = newRead;
+          changeDetected(buttonReadIndex, newRead, context->audioSampleRate);
         }
-
-        if(buttonReadIndex>=SWITCHCOUNT-1){
-          stateIndex=0;
-          return;
-        }
+      } else {
+        diffCount[buttonReadIndex] = 0;
       }
     }
-  }
-
+  
   stateIndex++;
+  if (indexRead==SWITCHCOUNT) {
+    stateIndex = 0;
+  }
 }
 
 // switch button mode
  void changeMode() {
   usingMap = (usingMap + 1) % 3;
-  if (!MIDIOVERUSB) {
     rt_printf("Using Map %d \n", usingMap);
-  }
 }
 
 // increase the 'up by one' count
 void raiseByOne() {
   upBy = (upBy + 1) % 12;
-  if (!MIDIOVERUSB) {
     rt_printf("Up By One: %d \n", upBy);
-  }
 }
 
 // when a button changes state
@@ -302,7 +292,7 @@ void changeDetected(int switchIndex, bool newState, int sampleRate) {
             // store what we played so we know what to switch off
         nowPlaying[switchIndex] = note;
         buttonPressed(note, sampleRate);
-          rt_printf("Switch Index %d ", switchIndex);
+          rt_printf("Switch Index %d \n", switchIndex);
 
       }
     }
