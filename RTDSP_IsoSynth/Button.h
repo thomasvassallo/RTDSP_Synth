@@ -1,20 +1,30 @@
 #ifndef Button_h
 #define Button_h
 
+#include <BeagleRT.h>
+#include <Utilities.h>
+#include <cmath>
+#include <rtdk.h>
+
 #include "ADSR.h"
 #include "Filter.h"
 #include "WaveTableOsc.h"
 
+#define myFloat double
+
+#define overSamp (2)
+#define constantRatioLimit (99999)
+
 
 class Button {
 public:
-    Button(double, double, double);
+    Button(int);
     ~Button(void);
 
     double getOutput();
     void setNoteOn(int);
     int isNoteOn();
-    void buttonReleased(int);
+    void buttonReleased();
     void buttonPressed(int , int);
 
 
@@ -28,8 +38,14 @@ Filter filter;
 ADSR env;
 ADSR filterEnv;
 
-int filterCuttoff = 200;
+int filterCuttoff;
 int noteOn;
+
+    void defineSawtooth(int , int numHarmonics, myFloat *ar, myFloat *ai);
+    void setSawtoothOsc(WaveTableOsc *osc, float baseFreq, int sampleRate);
+    void fft(int N, myFloat *ar, myFloat *ai);
+    float makeWaveTable(WaveTableOsc *osc, int len, myFloat *ar, myFloat *ai, myFloat scale, double topFreq);
+
 };
 
 
