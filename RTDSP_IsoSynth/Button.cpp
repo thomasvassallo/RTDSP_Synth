@@ -8,7 +8,11 @@ Button::Button(int sampleRate) {
     rt_printf("Button Class \n");
 
 
-    filterCuttoff = 200;
+    filterCuttoff = 50;
+
+    osc1.setFrequency(440/sampleRate);
+    osc2.setFrequency(440/sampleRate);
+    osc3.setFrequency(440/sampleRate);  
 
     filterEnv.setAttackRate(.1 * sampleRate);  // .1 second
     filterEnv.setDecayRate(.3 * sampleRate);
@@ -28,14 +32,21 @@ Button::Button(int sampleRate) {
 
  double Button::getOutput(){
 
-    double sound=env.process()*(osc1.getOutput() + osc2.getOutput() + osc3.getOutput());
+    if(env.getState()==0){
+
+        return 0.0;
+    }
+
+    double sound=env.process()*(osc1.getOutput() + osc2.getOutput() + osc3.getOutput()/5);
+
     osc1.updatePhase();
     osc2.updatePhase(); 
     osc3.updatePhase();    
 
     filter.setCutoff(filterCuttoff);
     filter.setCutoffMod(filterEnv.process());
-    return filter.process(sound);
+    sound=filter.process(sound);
+    return sound;
      }
 
     void Button::setNoteOn(int pressed){
@@ -49,8 +60,8 @@ void Button::buttonPressed(int note, int sampleRate) {
 
   double oscillatorFrequency=(440.0 / 32.0) * pow(2.0,((note - 9.0) / 12.0));;
 
-    osc1.setFrequency(oscillatorFrequency/sampleRate);
-    osc2.setFrequency(oscillatorFrequency/sampleRate);
+    osc1.setFrequency((oscillatorFrequency+0.20)/sampleRate);
+    osc2.setFrequency((oscillatorFrequency+0.30)/sampleRate);
     osc3.setFrequency(oscillatorFrequency/sampleRate);  
 
     env.gate(true);

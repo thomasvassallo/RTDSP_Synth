@@ -35,8 +35,8 @@ int gAudioFramesPerAnalogFrame;
 float fc;
 
 // pin layout
-int latchPin = P8_07;
-int dataPin = P8_09;
+int latchPin = P8_09;
+int dataPin = P8_07;
 int clockPin = P8_11;
 
 bool states[SWITCHCOUNT]; // the current recognised state
@@ -189,6 +189,7 @@ readButtons(context);
   
   // for each analogue frame, make some sound
   for (unsigned int m = 0; m < context->audioFrames; m++) {
+    sound=0.0;
 
       // if(!(m % gAudioFramesPerAnalogFrame)) {
       //   fc = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
@@ -197,12 +198,9 @@ readButtons(context);
     ph = lfoPhase;
     lfoMod=depth*lfo(ph, 3);
 
-
-    sound=0.0;
-
-    // filter1.setCutoff(filterCuttoff*lfoMod);
-    // filter1.setCutoffMod(filterEnv->process());
-    // sound = filter1.process(sound);
+    for(int j=0; j<SWITCHCOUNT; j++){
+      sound+=buttons[j]->getOutput();
+    }
 
     ph += frequency*inverseSampleRate;
         if(ph >= 1.0)
@@ -230,14 +228,12 @@ void readButtons(BeagleRTContext *context){
 
   if ((indexClock>=0) && (indexClock<SWITCHCOUNT)) { 
       digitalWriteFrame(context, 0, clockPin, GPIO_LOW);
-      digitalWriteFrame(context, 10, clockPin, GPIO_HIGH);
+      digitalWriteFrame(context, 2, clockPin, GPIO_HIGH);
   }
 
   if((indexRead>=0) && (indexRead<SWITCHCOUNT)) {
       int buttonReadIndex = indexRead;
-      bool newRead = digitalReadFrame(context, 5, dataPin);
-
-          rt_printf("%s", (newRead? "X":"_"));
+      bool newRead = digitalReadFrame(context, 1, dataPin);
 
       if (states[buttonReadIndex] != newRead) {
       // count the number of times we read a different state
@@ -256,7 +252,6 @@ void readButtons(BeagleRTContext *context){
   stateIndex++;
   if (indexRead==SWITCHCOUNT) {
     stateIndex = 0;
-    rt_printf("\n");
   }
 }
 
