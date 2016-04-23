@@ -18,7 +18,6 @@
 #define CHANGEAFTERREADS 2 // how many times we need to read the same value before we recognise a state change
 
 double sound = 0.0;
-double a = 440; // a is 440 hz...
 
 double lfoPhase;
 double inverseSampleRate;
@@ -32,7 +31,11 @@ int gPot2Input;
 int gPot3Input;
 int gPot4Input;
 
-int gAudioFramesPerAnalogFrame;
+int gPot5Input;
+int gPot6Input;
+int gPot7Input;
+int gPot8Input;
+
 float fc;
 
 // pin layout
@@ -142,9 +145,11 @@ int sampleRate = context->audioSampleRate;
  gPot3Input = 2;
  gPot4Input = 3;
 
-gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
+ gPot5Input = 4;
+ gPot6Input = 5;
+ gPot7Input = 6;
+ gPot8Input = 7;
   
-
   lfoPhase = 0.0;
     inverseSampleRate = 1.0/context->audioSampleRate;
     depth = 1;
@@ -156,6 +161,7 @@ gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
         pinModeFrame(context, 0, clockPin, OUTPUT);
         pinModeFrame(context, 0, dataPin, INPUT);
 
+
    // set everything to neutral
         for(int i=0; i<SWITCHCOUNT; i++) {
           states[i] = false;
@@ -164,9 +170,9 @@ gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
           buttonIndexMap[i] = -1;
 
           buttons[i] = new Button(context->audioSampleRate);
-          rt_printf("Test \n");
 
         }
+          rt_printf("Wavetables Created \n");
 
       // create reverse button lookup
         for (int j=0; j<KEYCOUNT; j++) {
@@ -192,18 +198,18 @@ void render(BeagleRTContext *context, void *userData)
 
  double a1 = map(analogReadFrame(context, 0, gPot1Input), 0, 0.82, 0.0001, 1.0);
  double d1 = map(analogReadFrame(context, 0, gPot2Input), 0, 0.82, 0.0001, 1.0);
- double s1 = map(analogReadFrame(context, 0, gPot3Input), 0, 0.82, 1, 1.0);
+ double s1 = map(analogReadFrame(context, 0, gPot3Input), 0, 0.82, 0.0, 1.0);
  double r1 = map(analogReadFrame(context, 0, gPot4Input), 0, 0.82, 0.0001, 1.0);
 
-// // double a2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// // double d2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// // double s2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// // double r2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+double a2 = map(analogReadFrame(context, 0, gPot5Input), 0, 0.82, 0.0001, 1.0);
+double d2 = map(analogReadFrame(context, 0, gPot6Input), 0, 0.82, 0.0001, 1.0);
+double s2 = map(analogReadFrame(context, 0, gPot7Input), 0, 0.82, 1.0, 1.0);
+double r2 = map(analogReadFrame(context, 0, gPot8Input), 0, 0.82, 0.0001, 1.0);
 
 
  for(int j=0; j<SWITCHCOUNT; j++){
  buttons[j]->setAmpEnv(a1, d1, s1, r1);
-// // buttons[j]->setFilterEnv(a2, d2, s2, r2);
+ buttons[j]->setFilterEnv(a2, d2, s2, r2);
    }
 
 
@@ -214,14 +220,9 @@ readButtons(context);
   for (unsigned int m = 0; m < context->audioFrames; m++) {
     sound=0.0;
 
-    
     for(int j=0; j<SWITCHCOUNT; j++){
       sound+=buttons[j]->getOutput();
     }
-
-    ph += frequency*inverseSampleRate;
-        if(ph >= 1.0)
-            ph -= 1.0;
 
     // write the sound value to left and right
     for (unsigned int channel = 0; channel < context->audioChannels; channel++)
@@ -303,7 +304,7 @@ void changeDetected(int switchIndex, bool newState, int sampleRate) {
             // store what we played so we know what to switch off
         nowPlaying[switchIndex] = note;
         buttons[switchIndex]->buttonPressed(note, sampleRate);
-          rt_printf("Switch Index %d \n", switchIndex);
+          // rt_printf("Switch Index %d \n", switchIndex);
 
       }
     }

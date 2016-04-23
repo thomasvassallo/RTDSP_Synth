@@ -5,11 +5,11 @@
 
 Button::Button(int sampleRate_) {
 
-    rt_printf("Button Class \n");
+    // rt_printf("Button Class \n");
 
     sampleRate=sampleRate_;
 
-    filterCuttoff = 50;
+    filterCuttoff = 1000;
 
     osc1.setFrequency(440/sampleRate);
     osc2.setFrequency(440/sampleRate);
@@ -49,10 +49,17 @@ void Button::setAmpEnv(float a1, float d1, float s1, float r1){
 
 void Button::setFilterEnv(float a2, float d2, float s2, float r2){
 
-    filterEnv.setAttackRate(a2 * sampleRate);  // .1 second
-    filterEnv.setDecayRate(d2 * sampleRate);
-    filterEnv.setReleaseRate(r2 * sampleRate);
-    filterEnv.setSustainLevel(s2);
+    fAttack=a2;
+    fDecay=d2;
+    fSustain=s2;
+    fRelease=r2;
+
+     if(filterEnv.getState()!=0){  
+    filterEnv.setAttackRate(fAttack * sampleRate);  // .1 second
+    filterEnv.setDecayRate(fDecay * sampleRate);
+    filterEnv.setReleaseRate(fRelease * sampleRate);
+    filterEnv.setSustainLevel(fSustain);
+    }
 }
 
  double Button::getOutput(){
@@ -62,15 +69,17 @@ void Button::setFilterEnv(float a2, float d2, float s2, float r2){
         return 0.0;
     }
 
-    double sound=env.process()*(osc1.getOutput() + osc2.getOutput() + osc3.getOutput()/5);
+    double sound=env.process()*((osc1.getOutput()/6) + (osc2.getOutput()/6) + (osc3.getOutput()/6));
 
     osc1.updatePhase();
     osc2.updatePhase(); 
     osc3.updatePhase();    
 
-    filter.setCutoff(filterCuttoff);
+    filter.setCutoff(0.3);
     filter.setCutoffMod(filterEnv.process());
-    sound=filter.process(sound);
+    filter.setResonance(0.8);
+    sound = filter.process(sound);
+
     return sound;
      }
 
@@ -83,21 +92,28 @@ void Button::setFilterEnv(float a2, float d2, float s2, float r2){
 
 void Button::buttonPressed(int note, int sampleRate) {
 
-  double oscillatorFrequency=(440.0 / 32.0) * pow(2.0,(((note+12) - 9.0) / 12.0));;
+  double oscillatorFrequency1=(440.0 / 32.0) * pow(2.0,(((note) - 9.0) / 12.0));
+  double oscillatorFrequency2=(440.0 / 32.0) * pow(2.0,(((note) - 9.0) / 12.0));
+  double oscillatorFrequency3=(440.0 / 32.0) * pow(2.0,(((note) - 9.0) / 12.0));
 
-    osc1.setFrequency((oscillatorFrequency+0.20)/sampleRate);
-    osc2.setFrequency((oscillatorFrequency+0.30)/sampleRate);
-    osc3.setFrequency(oscillatorFrequency/sampleRate);  
+    osc1.setFrequency((oscillatorFrequency1)/sampleRate);
+    osc2.setFrequency((oscillatorFrequency2+0.13)/sampleRate);
+    osc3.setFrequency((oscillatorFrequency3+0.22)/sampleRate);  
 
     env.setAttackRate(attack * sampleRate);  // .1 second
     env.setDecayRate(decay * sampleRate);
     env.setReleaseRate(release * sampleRate);
     env.setSustainLevel(sustain);
 
+    filterEnv.setAttackRate(fAttack * sampleRate);  // .1 second
+    filterEnv.setDecayRate(fDecay * sampleRate);
+    filterEnv.setReleaseRate(fRelease * sampleRate);
+    filterEnv.setSustainLevel(fSustain);
+
     env.gate(true);
     filterEnv.gate(true);
     
-    rt_printf("Frequency %f Note %d :ON \n", oscillatorFrequency, note);
+    // rt_printf("Frequency %f Note %d :ON \n", oscillatorFrequency, note);
   
 }
 
@@ -248,12 +264,31 @@ void Button::defineSawtooth(int len, int numHarmonics, myFloat *ar, myFloat *ai)
         ar[idx] = 0;
     }
 
-    // sawtooth
-    for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
-        myFloat temp = -1.0 / idx;
-        ar[idx] = -temp;
-        ar[jdx] = temp;
-    }
+    // // sawtooth
+    // for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
+    //     myFloat temp = -1.0 / idx;
+    //     ar[idx] = -temp;
+    //     ar[jdx] = temp;
+    // }
+    // examples of other waves
+    
+
+     // square
+     for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
+     myFloat temp = idx & 0x01 ? 1.0 / idx : 0.0;
+     ar[idx] = -temp;
+     ar[jdx] = temp;
+     }
+     
+    
+     // // triangle
+     // float sign = 1;
+     // for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
+     // myFloat temp = idx & 0x01 ? 1.0 / (idx * idx) * (sign = -sign) : 0.0;
+     // ar[idx] = -temp;
+     // ar[jdx] = temp;
+     // }
+    
 }
 
 
