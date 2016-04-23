@@ -27,7 +27,11 @@ double frequency;
 float ph;
 float lfoMod;
 
-int gPotInput;
+int gPot1Input;
+int gPot2Input;
+int gPot3Input;
+int gPot4Input;
+
 int gAudioFramesPerAnalogFrame;
 float fc;
 
@@ -133,8 +137,12 @@ bool setup(BeagleRTContext *context, void *userData)
 
 int sampleRate = context->audioSampleRate;
 
-  gPotInput=1;
-  gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
+ gPot1Input = 0;
+ gPot2Input = 1;
+ gPot3Input = 2;
+ gPot4Input = 3;
+
+gAudioFramesPerAnalogFrame = context->audioFrames / context->analogFrames;
   
 
   lfoPhase = 0.0;
@@ -182,20 +190,22 @@ void render(BeagleRTContext *context, void *userData)
 {
 
 
-// double a1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// double d1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// double s1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// double r1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+ double a1 = map(analogReadFrame(context, 0, gPot1Input), 0, 0.82, 0.0001, 1.0);
+ double d1 = map(analogReadFrame(context, 0, gPot2Input), 0, 0.82, 0.0001, 1.0);
+ double s1 = map(analogReadFrame(context, 0, gPot3Input), 0, 0.82, 1, 1.0);
+ double r1 = map(analogReadFrame(context, 0, gPot4Input), 0, 0.82, 0.0001, 1.0);
 
-// double a2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// double d2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// double s2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-// double r2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// // double a2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// // double d2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// // double s2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// // double r2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
 
-// for(int j=0; j<SWITCHCOUNT; j++){
-// buttons[j]->setAmpEnv(a1, d1, s1, r1);
-// buttons[j]->setFilterEnv(a2, d2, s2, r2);
-// }
+
+ for(int j=0; j<SWITCHCOUNT; j++){
+ buttons[j]->setAmpEnv(a1, d1, s1, r1);
+// // buttons[j]->setFilterEnv(a2, d2, s2, r2);
+   }
+
 
 readButtons(context);
 

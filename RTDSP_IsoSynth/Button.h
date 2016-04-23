@@ -44,6 +44,7 @@ int sampleRate;
 
 int filterCuttoff;
 int noteOn;
+float attack, decay, sustain, release;
 
     void defineSawtooth(int , int numHarmonics, myFloat *ar, myFloat *ai);
     void setSawtoothOsc(WaveTableOsc *osc, float baseFreq, int sampleRate);

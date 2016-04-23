@@ -33,10 +33,18 @@ Button::Button(int sampleRate_) {
 
 void Button::setAmpEnv(float a1, float d1, float s1, float r1){
 
-    env.setAttackRate(a1 * sampleRate);  // .1 second
-    env.setDecayRate(d1 * sampleRate);
-    env.setReleaseRate(r1 * sampleRate);
-    env.setSustainLevel(s1);
+    attack=a1;
+    decay=d1;
+    sustain=s1;
+    release=r1;
+
+     if(env.getState()!=0){    
+
+    env.setAttackRate(attack * sampleRate);  // .1 second
+    env.setDecayRate(decay * sampleRate);
+    env.setReleaseRate(release * sampleRate);
+    env.setSustainLevel(sustain);
+    }
 }
 
 void Button::setFilterEnv(float a2, float d2, float s2, float r2){
@@ -75,11 +83,16 @@ void Button::setFilterEnv(float a2, float d2, float s2, float r2){
 
 void Button::buttonPressed(int note, int sampleRate) {
 
-  double oscillatorFrequency=(440.0 / 32.0) * pow(2.0,((note - 9.0) / 12.0));;
+  double oscillatorFrequency=(440.0 / 32.0) * pow(2.0,(((note+12) - 9.0) / 12.0));;
 
     osc1.setFrequency((oscillatorFrequency+0.20)/sampleRate);
     osc2.setFrequency((oscillatorFrequency+0.30)/sampleRate);
     osc3.setFrequency(oscillatorFrequency/sampleRate);  
+
+    env.setAttackRate(attack * sampleRate);  // .1 second
+    env.setDecayRate(decay * sampleRate);
+    env.setReleaseRate(release * sampleRate);
+    env.setSustainLevel(sustain);
 
     env.gate(true);
     filterEnv.gate(true);
