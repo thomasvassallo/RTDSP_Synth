@@ -3,10 +3,11 @@
 #include <math.h>
 
 
-Button::Button(int sampleRate) {
+Button::Button(int sampleRate_) {
 
     rt_printf("Button Class \n");
 
+    sampleRate=sampleRate_;
 
     filterCuttoff = 50;
 
@@ -28,6 +29,22 @@ Button::Button(int sampleRate) {
     setSawtoothOsc(&osc2, 20, sampleRate);
     setSawtoothOsc(&osc3, 20, sampleRate);
 
+}
+
+void Button::setAmpEnv(float a1, float d1, float s1, float r1){
+
+    env.setAttackRate(a1 * sampleRate);  // .1 second
+    env.setDecayRate(d1 * sampleRate);
+    env.setReleaseRate(r1 * sampleRate);
+    env.setSustainLevel(s1);
+}
+
+void Button::setFilterEnv(float a2, float d2, float s2, float r2){
+
+    filterEnv.setAttackRate(a2 * sampleRate);  // .1 second
+    filterEnv.setDecayRate(d2 * sampleRate);
+    filterEnv.setReleaseRate(r2 * sampleRate);
+    filterEnv.setSustainLevel(s2);
 }
 
  double Button::getOutput(){

@@ -15,10 +15,7 @@
 #define SWITCHCOUNT 40 // how many switches are we reading
 #define KEYCOUNT 37   // how many buttons are we reading
 
-#define PROPAGATIONDELAY 20 // standard delay after we send a signal down the line
-#define CHANGEAFTERREADS 8 // how many times we need to read the same value before we recognise a state change
-#define MIDIOVERUSB (true) // if this is true then we output midi commands over usb instead of debug over usb and midi over USART1
-
+#define CHANGEAFTERREADS 2 // how many times we need to read the same value before we recognise a state change
 
 double sound = 0.0;
 double a = 440; // a is 440 hz...
@@ -184,6 +181,22 @@ int sampleRate = context->audioSampleRate;
 void render(BeagleRTContext *context, void *userData)
 {
 
+
+// double a1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// double d1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// double s1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// double r1 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+
+// double a2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// double d2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// double s2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+// double r2 = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
+
+// for(int j=0; j<SWITCHCOUNT; j++){
+// buttons[j]->setAmpEnv(a1, d1, s1, r1);
+// buttons[j]->setFilterEnv(a2, d2, s2, r2);
+// }
+
 readButtons(context);
 
   
@@ -191,13 +204,7 @@ readButtons(context);
   for (unsigned int m = 0; m < context->audioFrames; m++) {
     sound=0.0;
 
-      // if(!(m % gAudioFramesPerAnalogFrame)) {
-      //   fc = map(analogReadFrame(context, m/gAudioFramesPerAnalogFrame, gPotInput), 0, 0.82, 0, 0.8);
-      //   }
-
-    ph = lfoPhase;
-    lfoMod=depth*lfo(ph, 3);
-
+    
     for(int j=0; j<SWITCHCOUNT; j++){
       sound+=buttons[j]->getOutput();
     }
@@ -210,9 +217,6 @@ readButtons(context);
     for (unsigned int channel = 0; channel < context->audioChannels; channel++)
       context->audioOut[m * context->audioChannels + channel] = sound;
   }
-
-  lfoPhase = ph;
-
 }
 
 void readButtons(BeagleRTContext *context){

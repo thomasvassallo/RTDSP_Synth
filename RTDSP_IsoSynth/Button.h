@@ -26,6 +26,8 @@ public:
     int isNoteOn();
     void buttonReleased();
     void buttonPressed(int , int);
+    void setFilterEnv(float, float, float, float);
+    void setAmpEnv(float, float, float, float);
 
 
 private:
@@ -37,6 +39,8 @@ Filter filter;
 
 ADSR env;
 ADSR filterEnv;
+
+int sampleRate;
 
 int filterCuttoff;
 int noteOn;
