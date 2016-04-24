@@ -38,13 +38,13 @@ void Button::setAmpEnv(float a1, float d1, float s1, float r1){
     sustain=s1;
     release=r1;
 
-     if(env.getState()!=0){    
+    if(env.getState()!=0){    
 
     env.setAttackRate(attack * sampleRate);  // .1 second
     env.setDecayRate(decay * sampleRate);
     env.setReleaseRate(release * sampleRate);
     env.setSustainLevel(sustain);
-    }
+}
 }
 
 void Button::setFilterEnv(float a2, float d2, float s2, float r2){
@@ -54,15 +54,15 @@ void Button::setFilterEnv(float a2, float d2, float s2, float r2){
     fSustain=s2;
     fRelease=r2;
 
-     if(filterEnv.getState()!=0){  
+    if(filterEnv.getState()!=0){  
     filterEnv.setAttackRate(fAttack * sampleRate);  // .1 second
     filterEnv.setDecayRate(fDecay * sampleRate);
     filterEnv.setReleaseRate(fRelease * sampleRate);
     filterEnv.setSustainLevel(fSustain);
-    }
+}
 }
 
- double Button::getOutput(){
+double Button::getOutput(){
 
     if(env.getState()==0){
 
@@ -75,20 +75,20 @@ void Button::setFilterEnv(float a2, float d2, float s2, float r2){
     osc2.updatePhase(); 
     osc3.updatePhase();    
 
-    filter.setCutoff(0.3);
+    filter.setCutoff(0.1);
     filter.setCutoffMod(filterEnv.process());
-    filter.setResonance(0.8);
+    filter.setResonance(0.1);
     sound = filter.process(sound);
 
     return sound;
-     }
+}
 
-    void Button::setNoteOn(int pressed){
-        noteOn=pressed;
-    }
-    int Button::isNoteOn(){
-        return noteOn;
-    }
+void Button::setNoteOn(int pressed){
+    noteOn=pressed;
+}
+int Button::isNoteOn(){
+    return noteOn;
+}
 
 void Button::buttonPressed(int note, int sampleRate) {
 
@@ -96,9 +96,9 @@ void Button::buttonPressed(int note, int sampleRate) {
   double oscillatorFrequency2=(440.0 / 32.0) * pow(2.0,(((note) - 9.0) / 12.0));
   double oscillatorFrequency3=(440.0 / 32.0) * pow(2.0,(((note) - 9.0) / 12.0));
 
-    osc1.setFrequency((oscillatorFrequency1)/sampleRate);
-    osc2.setFrequency((oscillatorFrequency2+0.13)/sampleRate);
-    osc3.setFrequency((oscillatorFrequency3+0.22)/sampleRate);  
+  osc1.setFrequency((oscillatorFrequency1)/sampleRate);
+  osc2.setFrequency((oscillatorFrequency2+0.13)/sampleRate);
+  osc3.setFrequency((oscillatorFrequency3+0.22)/sampleRate);  
 
     env.setAttackRate(attack * sampleRate);  // .1 second
     env.setDecayRate(decay * sampleRate);
@@ -114,7 +114,7 @@ void Button::buttonPressed(int note, int sampleRate) {
     filterEnv.gate(true);
     
     // rt_printf("Frequency %f Note %d :ON \n", oscillatorFrequency, note);
-  
+
 }
 
 void Button::buttonReleased() {
@@ -142,7 +142,7 @@ float Button::makeWaveTable(WaveTableOsc *osc, int len, myFloat *ar, myFloat *ai
     float wave[len];
     for (int idx = 0; idx < len; idx++)
         wave[idx] = ai[idx] * scale;
-        
+
     if (osc->addWaveTable(len, wave, topFreq))
         scale = 0.0;
     
@@ -159,7 +159,7 @@ void Button::fft(int N, myFloat *ar, myFloat *ai)
  by K. Steiglitz  (ken@princeton.edu)
  Computer Science Dept. 
  Princeton University 08544          */
-{    
+ {    
     int i, j, k, L;            /* indexes */
     int M, TEMP, LE, LE1, ip;  /* M = log N */
     int NV2, NM1;
@@ -179,24 +179,24 @@ void Button::fft(int N, myFloat *ar, myFloat *ai)
     j = 1;
     for (i = 1; i <= NM1; i++) {
         if(i<j) {             /* swap a[i] and a[j] */
-            t = ar[j-1];     
-            ar[j-1] = ar[i-1];
-            ar[i-1] = t;
-            t = ai[j-1];
-            ai[j-1] = ai[i-1];
-            ai[i-1] = t;
-        }
-        
-        k = NV2;             /* bit-reversed counter */
-        while(k < j) {
-            j -= k;
-            k /= 2;
-        }
-        
-        j += k;
+        t = ar[j-1];     
+        ar[j-1] = ar[i-1];
+        ar[i-1] = t;
+        t = ai[j-1];
+        ai[j-1] = ai[i-1];
+        ai[i-1] = t;
     }
-    
-    LE = 1.;
+
+        k = NV2;             /* bit-reversed counter */
+    while(k < j) {
+        j -= k;
+        k /= 2;
+    }
+
+    j += k;
+}
+
+LE = 1.;
     for (L = 1; L <= M; L++) {            // stage L
         LE1 = LE;                         // (LE1 = LE/2) 
         LE *= 2;                          // (LE = 2^L)
@@ -274,13 +274,13 @@ void Button::defineSawtooth(int len, int numHarmonics, myFloat *ar, myFloat *ai)
     
 
      // square
-     for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
-     myFloat temp = idx & 0x01 ? 1.0 / idx : 0.0;
-     ar[idx] = -temp;
-     ar[jdx] = temp;
-     }
-     
-    
+    for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
+       myFloat temp = idx & 0x01 ? 1.0 / idx : 0.0;
+       ar[idx] = -temp;
+       ar[jdx] = temp;
+   }
+
+
      // // triangle
      // float sign = 1;
      // for (int idx = 1, jdx = len - 1; idx <= numHarmonics; idx++, jdx--) {
@@ -288,7 +288,7 @@ void Button::defineSawtooth(int len, int numHarmonics, myFloat *ar, myFloat *ai)
      // ar[idx] = -temp;
      // ar[jdx] = temp;
      // }
-    
+
 }
 
 

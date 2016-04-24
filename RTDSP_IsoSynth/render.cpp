@@ -36,7 +36,10 @@ int gPot6Input;
 int gPot7Input;
 int gPot8Input;
 
-float fc;
+// Variables will change:
+int buttonPushCounter = 0;   // counter for the number of button presses
+int buttonState = 0;         // current state of the button
+int lastButtonState = 0;     // previous state of the button
 
 // pin layout
 int latchPin = P8_09;
@@ -138,8 +141,6 @@ void changeMode();
 bool setup(BeagleRTContext *context, void *userData)
 {
 
-int sampleRate = context->audioSampleRate;
-
  gPot1Input = 0;
  gPot2Input = 1;
  gPot3Input = 2;
@@ -196,26 +197,52 @@ void render(BeagleRTContext *context, void *userData)
 {
 
 
- double a1 = map(analogReadFrame(context, 0, gPot1Input), 0, 0.82, 0.0001, 1.0);
- double d1 = map(analogReadFrame(context, 0, gPot2Input), 0, 0.82, 0.0001, 1.0);
- double s1 = map(analogReadFrame(context, 0, gPot3Input), 0, 0.82, 0.0, 1.0);
- double r1 = map(analogReadFrame(context, 0, gPot4Input), 0, 0.82, 0.0001, 1.0);
+buttonState=digitalReadFrame(context, 0, P9_12); //read the value of the button
 
-double a2 = map(analogReadFrame(context, 0, gPot5Input), 0, 0.82, 0.0001, 1.0);
-double d2 = map(analogReadFrame(context, 0, gPot6Input), 0, 0.82, 0.0001, 1.0);
-double s2 = map(analogReadFrame(context, 0, gPot7Input), 0, 0.82, 1.0, 1.0);
-double r2 = map(analogReadFrame(context, 0, gPot8Input), 0, 0.82, 0.0001, 1.0);
+  if (buttonState != lastButtonState) {
+    if(buttonState==1){
+
+      if(buttonPushCounter == 0)
+      {
+      rt_printf("Oscillators %d \n",buttonPushCounter);
 
 
- for(int j=0; j<SWITCHCOUNT; j++){
- buttons[j]->setAmpEnv(a1, d1, s1, r1);
- buttons[j]->setFilterEnv(a2, d2, s2, r2);
-   }
 
+
+      buttonPushCounter++;
+      }
+      else if(buttonPushCounter == 1)
+      {
+      rt_printf("Envelopes %d \n",buttonPushCounter);
+
+      double a1 = map(analogReadFrame(context, 0, gPot1Input), 0.0, 0.82, 0.0001, 1.0);
+      double d1 = map(analogReadFrame(context, 0, gPot2Input), 0.0, 0.82, 0.0001, 1.0);
+      double s1 = map(analogReadFrame(context, 0, gPot3Input), 0.0, 0.82, 0.0, 1.0);
+      double r1 = map(analogReadFrame(context, 0, gPot4Input), 0.0, 0.82, 0.0001, 1.0);
+
+      double a2 = map(analogReadFrame(context, 0, gPot5Input), 0.0, 1.0, 0.0001, 1.0);
+      double d2 = map(analogReadFrame(context, 0, gPot6Input), 0.0, 0.82, 0.0001, 1.0);
+      double s2 = map(analogReadFrame(context, 0, gPot7Input), 0.0, 0.82, 1.0, 1.0);
+      double r2 = map(analogReadFrame(context, 0, gPot8Input), 0.0 , 0.82, 0.0001, 1.0);
+
+      for(int j=0; j<SWITCHCOUNT; j++){
+      buttons[j]->setAmpEnv(a1, d1, s1, r1);
+      buttons[j]->setFilterEnv(a2, d2, s2, r2);
+       }
+
+      buttonPushCounter++;
+      }
+      else if(buttonPushCounter == 2)
+      {
+      rt_printf("Filter %d \n",buttonPushCounter);
+      buttonPushCounter = 0;
+      }
+    } 
+    lastButtonState=buttonState;
+  }
 
 readButtons(context);
 
-  
   // for each analogue frame, make some sound
   for (unsigned int m = 0; m < context->audioFrames; m++) {
     sound=0.0;
