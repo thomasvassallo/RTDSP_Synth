@@ -1,28 +1,9 @@
-//
-//  ADSR.cpp
-//
-//  Created by Nigel Redmon on 12/18/12.
-//  EarLevel Engineering: earlevel.com
-//  Copyright 2012 Nigel Redmon
-//
-//  For a complete explanation of the ADSR envelope generator and code,
-//  read the series of articles by the author, starting here:
-//  http://www.earlevel.com/main/2013/06/01/envelope-generators/
-//
-//  License:
-//
-//  This source code is provided as is, without warranty.
-//  You may copy and distribute verbatim copies of this document.
-//  You may modify and use this source code to create binary code for your own purposes, free or commercial.
-//
-//  1.01  2016-01-02  njr   added calcCoefs to SetTargetRatio functions that were in the ADSR widget but missing in this code
-//
-
 #include "ADSR.h"
 #include <math.h>
 
 
 ADSR::ADSR(void) {
+	//Initialise the ADSR parameters
     reset();
     setAttackRate(0);
     setDecayRate(0);
@@ -35,18 +16,24 @@ ADSR::ADSR(void) {
 ADSR::~ADSR(void) {
 }
 
+//Calculates the attack rate section of the ADSR
+//according to the assigned value
 void ADSR::setAttackRate(float rate) {
     attackRate = rate;
     attackCoef = calcCoef(rate, targetRatioA);
     attackBase = (1.0 + targetRatioA) * (1.0 - attackCoef);
 }
 
+//Calculates the decay rate section of the ADSR
+//according to the assigned value
 void ADSR::setDecayRate(float rate) {
     decayRate = rate;
     decayCoef = calcCoef(rate, targetRatioDR);
     decayBase = (sustainLevel - targetRatioDR) * (1.0 - decayCoef);
 }
 
+//Calculates the release rate section of the ADSR
+//according to the assigned value
 void ADSR::setReleaseRate(float rate) {
     releaseRate = rate;
     releaseCoef = calcCoef(rate, targetRatioDR);
@@ -57,11 +44,15 @@ float ADSR::calcCoef(float rate, float targetRatio) {
     return exp(-log((1.0 + targetRatio) / targetRatio) / rate);
 }
 
+//Determines the level at which the oscillators will remain at
+//as a button is held down
 void ADSR::setSustainLevel(float level) {
     sustainLevel = level;
     decayBase = (sustainLevel - targetRatioDR) * (1.0 - decayCoef);
 }
 
+//Adjust the curves for the attack section of the ADSR
+//This is an inversely exponential growth function
 void ADSR::setTargetRatioA(float targetRatio) {
     if (targetRatio < 0.000000001)
         targetRatio = 0.000000001;  // -180 dB
@@ -70,6 +61,9 @@ void ADSR::setTargetRatioA(float targetRatio) {
     attackBase = (1.0 + targetRatioA) * (1.0 - attackCoef);
 }
 
+
+//Adjust the curves for the decay and release sections of the ADSR
+//These sections are incersely exponential decay funtions
 void ADSR::setTargetRatioDR(float targetRatio) {
     if (targetRatio < 0.000000001)
         targetRatio = 0.000000001;  // -180 dB
