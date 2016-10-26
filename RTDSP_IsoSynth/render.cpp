@@ -244,6 +244,7 @@ void render(BeagleRTContext *context, void *userData)
   for (unsigned int m = 0; m < context->audioFrames; m++) {
     sound=0.0;
 
+//sum the output of all the buttons 
     for(int j=0; j<SWITCHCOUNT; j++){
       sound+=buttons[j]->getOutput();
     }

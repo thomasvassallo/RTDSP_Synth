@@ -86,7 +86,7 @@ double Button::getOutput(){
     //Temporary fixed values for the filter
     //Also aim to have these as user controllable 
     double resonance = 0.6;
-    double cutoff =0.6;
+    double cutoff =0.3;
 
     //Temporary fixed value for the amount that the envelope will modulate the filter
     //Should range between -1 & 1

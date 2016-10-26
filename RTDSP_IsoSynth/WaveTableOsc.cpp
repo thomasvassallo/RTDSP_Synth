@@ -106,6 +106,9 @@ float WaveTableOsc::getOutput() {
 //
 // returns the current oscillator output
 //
+
+
+//NOT CURRENTLY USED IN PROJECT
 float WaveTableOsc::getOutputMinusOffset() {
     // grab the appropriate wavetable
     int waveTableIdx = 0;
