@@ -1,21 +1,3 @@
-//
-//  ADRS.h
-//
-//  Created by Nigel Redmon on 12/18/12.
-//  EarLevel Engineering: earlevel.com
-//  Copyright 2012 Nigel Redmon
-//
-//  For a complete explanation of the ADSR envelope generator and code,
-//  read the series of articles by the author, starting here:
-//  http://www.earlevel.com/main/2013/06/01/envelope-generators/
-//
-//  License:
-//
-//  This source code is provided as is, without warranty.
-//  You may copy and distribute verbatim copies of this document.
-//  You may modify and use this source code to create binary code for your own purposes, free or commercial.
-//
-
 #ifndef ADRS_h
 #define ADRS_h
 
@@ -63,6 +45,9 @@ protected:
     float calcCoef(float rate, float targetRatio);
 };
 
+//State machine for the ADSR process. 
+//Allows the adsr to move from one stage to the next after the
+//assigned time or when the button has been pressed/released
 inline float ADSR::process() {
 	switch (state) {
         case env_idle:
